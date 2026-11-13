@@ -4,7 +4,7 @@ A **VS Code extension for Windows**: right-click a file, choose **Open With Exte
 
 ## Install
 
-1. Download `abrir-com-externo-0.1.3.vsix`, or build it from source as described below.
+1. Download `open-with-external-0.1.4.vsix`, or build it from source as described below.
 2. In VS Code, open **Extensions** (`Ctrl+Shift+X`).
 3. Open the **…** menu, select **Install from VSIX…**, and choose the package.
 4. Reload the VS Code window if prompted.
@@ -12,7 +12,7 @@ A **VS Code extension for Windows**: right-click a file, choose **Open With Exte
 You can also install from a terminal:
 
 ```powershell
-code --install-extension .\abrir-com-externo-0.1.3.vsix
+code --install-extension .\open-with-external-0.1.4.vsix
 ```
 
 The extension uses Windows PowerShell 5.1 and the Windows Shell APIs. You do not need Node.js or development tools to use the VSIX. Requires VS Code 1.96 or later; intended for Windows 10/11.
@@ -70,7 +70,7 @@ npm test
 npm run package
 ```
 
-Press `F5` to launch an Extension Development Host. The compiled package is `abrir-com-externo-0.1.3.vsix`. The extension has not been published to the VS Code Marketplace.
+Press `F5` to launch an Extension Development Host. The compiled package is `open-with-external-0.1.4.vsix`. The extension has not been published to the VS Code Marketplace.
 
 ### Project structure
 

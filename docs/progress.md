@@ -22,3 +22,5 @@ Final independent follow-up review: no material findings. Unknown/alternate DOCX
 Follow-up verification: 25 automated tests pass; the VSIX includes dist/compatibility.js and English metadata/messages.
 
 Follow-up 0.1.3: the picker kept focus because ignoreFocusOut was true. Set it to false so clicking outside dismisses the picker; existing cancellation handling returns without launching an application.
+
+Follow-up 0.1.4: package filename and README installation/build examples now use open-with-external-0.1.4.vsix. UI and documentation remain English; internal extension and command IDs are preserved to allow in-place upgrades.
