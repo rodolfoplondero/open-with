@@ -1,8 +1,8 @@
 {
   "name": "abrir-com-externo",
-  "displayName": "Abrir com programa externo",
-  "description": "Escolha no VS Code um aplicativo associado no Windows para abrir o arquivo.",
-  "version": "0.1.1",
+  "displayName": "Open With External Application",
+  "description": "Open local files with compatible Windows applications from a searchable VS Code picker.",
+  "version": "0.1.2",
   "publisher": "local-tools",
   "license": "MIT",
   "engines": {
@@ -27,8 +27,8 @@
     "commands": [
       {
         "command": "abrirComExterno.open",
-        "title": "Abrir com programa externo…",
-        "category": "Arquivo",
+        "title": "Open With External Application…",
+        "category": "File",
         "enablement": "isWindows"
       }
     ],
@@ -60,7 +60,7 @@
     "compile": "tsc -p .",
     "test": "npm run compile && node --test test/*.test.cjs",
     "vscode:prepublish": "npm run compile",
-    "package": "vsce package --allow-missing-repository --out abrir-com-externo-0.1.1.vsix"
+    "package": "vsce package --allow-missing-repository --out abrir-com-externo-0.1.2.vsix"
   },
   "devDependencies": {
     "@types/node": "22.19.0",

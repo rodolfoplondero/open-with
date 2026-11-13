@@ -105,7 +105,7 @@ namespace ExternalOpen
         public static void Open(string filePath, string handlerId)
         {
             IEnumAssocHandlers handlers = Enumerate(filePath);
-            if (handlers == null) throw new InvalidOperationException("O aplicativo selecionado nao esta mais associado ao arquivo.");
+            if (handlers == null) throw new InvalidOperationException("The selected application is no longer associated with this file.");
             try
             {
                 while (true)
@@ -137,7 +137,7 @@ namespace ExternalOpen
                 }
             }
             finally { Release(handlers); }
-            throw new InvalidOperationException("O aplicativo selecionado nao esta mais disponivel. Abra a lista novamente.");
+            throw new InvalidOperationException("The selected application is no longer available. Open the list again.");
         }
         public static void Native(string filePath)
         {

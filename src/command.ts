@@ -18,16 +18,16 @@ export async function runOpenExternal(
 ): Promise<Status> {
   try {
     if (host.platform !== 'win32') {
-      await host.error('Esta extensão está disponível apenas no Windows.');
+      await host.error('This extension is available on Windows only.');
       return 'unsupported';
     }
     const file = target ?? host.activeFile();
     if (!file || file.scheme !== 'file') {
-      await host.error('Selecione um arquivo local salvo no Windows. Arquivos remotos e documentos sem salvar não são compatíveis.');
+      await host.error('Select a saved local file on Windows. Remote files and untitled documents are not supported.');
       return 'invalid';
     }
     if (!await host.isFile(file.fsPath)) {
-      await host.error('O item selecionado não é um arquivo acessível. Selecione um arquivo, não uma pasta.');
+      await host.error('The selected item is not an accessible file. Select a file instead of a folder.');
       return 'invalid';
     }
     if (!await host.prepareFile(file)) return 'cancelled';
@@ -36,12 +36,12 @@ export async function runOpenExternal(
       apps = await host.progress(() => bridge.list(file.fsPath));
     } catch (error) {
       const detail = error instanceof Error ? error.message : String(error);
-      if (!await host.offerNative(`Não foi possível consultar os aplicativos do Windows: ${detail}`)) return 'cancelled';
+      if (!await host.offerNative(`Could not query Windows applications: ${detail}`)) return 'cancelled';
       await bridge.native(file.fsPath);
       return 'opened';
     }
     if (apps.length === 0) {
-      if (!await host.offerNative('O Windows não informou aplicativos associados a este tipo de arquivo.')) return 'cancelled';
+      if (!await host.offerNative('No supported applications were found for this file type.')) return 'cancelled';
       await bridge.native(file.fsPath);
       return 'opened';
     }
@@ -52,7 +52,7 @@ export async function runOpenExternal(
     return 'opened';
   } catch (error) {
     const detail = error instanceof Error ? error.message : String(error);
-    await host.error(`Não foi possível abrir o arquivo: ${detail}`);
+    await host.error(`Could not open the file: ${detail}`);
     return 'failed';
   }
 }

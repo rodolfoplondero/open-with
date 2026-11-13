@@ -1,5 +1,6 @@
 import { spawn, SpawnOptions, ChildProcess } from 'node:child_process';
 import * as path from 'node:path';
+import { isCompatibleHandler } from './compatibility';
 
 export interface App { id: string; name: string; recommended: boolean }
 export interface BridgeRequest { action: 'list' | 'open' | 'native'; filePath: string; handlerId?: string }
@@ -27,7 +28,7 @@ export function createPowerShellRunner(extensionPath: string, spawnProcess: Spaw
       length += Buffer.byteLength(chunk);
       if (length > 4 * 1024 * 1024) {
         child.kill();
-        reject(new Error('A resposta do Windows excedeu o limite permitido.'));
+        reject(new Error('The Windows response exceeded the size limit.'));
         return;
       }
       if (errorStream) stderr += chunk; else stdout += chunk;
@@ -37,8 +38,8 @@ export function createPowerShellRunner(extensionPath: string, spawnProcess: Spaw
     child.on('close', (code, signal) => {
       if (code !== 0) {
         reject(new Error(signal
-          ? 'A consulta ao Windows foi interrompida ou excedeu 30 segundos.'
-          : (stderr.trim() || `O PowerShell encerrou com código ${code}.`)));
+          ? 'The Windows query was interrupted or exceeded 30 seconds.'
+          : (stderr.trim() || `PowerShell exited with code ${code}.`)));
       } else resolve(stdout.replace(/^\uFEFF/, '').trim());
     });
     child.stdin?.end(JSON.stringify(request), 'utf8');
@@ -54,22 +55,25 @@ export class WindowsBridge {
     let parsed: unknown;
     try { parsed = JSON.parse(await this.run({ action: 'list', filePath })); }
     catch (error) {
-      if (error instanceof SyntaxError) throw new Error('Resposta inválida do Windows.');
+      if (error instanceof SyntaxError) throw new Error('Invalid response from Windows.');
       throw error;
     }
     if (!Array.isArray(parsed) || parsed.some(item =>
       !item || typeof item.id !== 'string' || !item.id ||
       typeof item.name !== 'string' || !item.name || typeof item.recommended !== 'boolean')) {
-      throw new Error('Resposta inválida do Windows.');
+      throw new Error('Invalid response from Windows.');
     }
     const unique = new Map<string, App>();
     for (const item of parsed as App[]) {
-      if (item.recommended && !unique.has(item.id)) unique.set(item.id, item);
+      if (item.recommended && isCompatibleHandler(filePath, item.id) && !unique.has(item.id)) unique.set(item.id, item);
     }
     return [...unique.values()].sort((a, b) =>
-      Number(b.recommended) - Number(a.recommended) || a.name.localeCompare(b.name, 'pt-BR') || a.id.localeCompare(b.id));
+      Number(b.recommended) - Number(a.recommended) || a.name.localeCompare(b.name, 'en') || a.id.localeCompare(b.id));
   }
   async open(filePath: string, handlerId: string): Promise<void> {
+    if (!isCompatibleHandler(filePath, handlerId)) {
+      throw new Error('The selected application is not a recognized DOCX document editor.');
+    }
     await this.run({ action: 'open', filePath, handlerId });
   }
   async native(filePath: string): Promise<void> {

@@ -16,14 +16,14 @@ export function activate(context: vscode.ExtensionContext): void {
       const doc = vscode.workspace.textDocuments.find(document =>
         document.uri.scheme === target.scheme && document.uri.fsPath === target.fsPath);
       if (!doc?.isDirty) return true;
-      const save = 'Salvar e abrir';
-      const disk = 'Abrir versão salva';
+      const save = 'Save and Open';
+      const disk = 'Open Saved Version';
       const choice = await vscode.window.showWarningMessage(
-        'Este arquivo tem alterações não salvas. O programa externo abrirá a versão do disco.',
+        'This file has unsaved changes. The external application will open the version on disk.',
         { modal: true }, save, disk);
       if (choice === save) {
         const saved = await doc.save();
-        if (!saved) await vscode.window.showErrorMessage('O arquivo não foi salvo. A abertura foi cancelada.');
+        if (!saved) await vscode.window.showErrorMessage('The file was not saved. Opening was cancelled.');
         return saved;
       }
       return choice === disk;
@@ -31,24 +31,24 @@ export function activate(context: vscode.ExtensionContext): void {
     pick: async (apps, filePath) => {
       const items: AppItem[] = apps.map(app => ({
         label: app.name,
-        description: app.recommended ? 'Recomendado pelo Windows' : undefined,
+        description: app.recommended ? 'Recommended by Windows' : undefined,
         detail: app.id,
         choice: { kind: 'app', app }
       }));
       items.push({ label: '', kind: vscode.QuickPickItemKind.Separator });
-      items.push({ label: 'Escolher outro aplicativo no Windows…', choice: { kind: 'native' } });
+      items.push({ label: 'Choose Another Application in Windows…', choice: { kind: 'native' } });
       const chosen = await vscode.window.showQuickPick(items, {
-        title: `Abrir ${path.win32.basename(filePath)} com…`,
-        placeHolder: 'Pesquise e selecione um programa',
+        title: `Open ${path.win32.basename(filePath)} With…`,
+        placeHolder: 'Search for and select an application',
         matchOnDescription: true, matchOnDetail: true, ignoreFocusOut: true
       });
       return chosen?.choice;
     },
     progress: async task => await vscode.window.withProgress({
-      location: vscode.ProgressLocation.Notification, title: 'Consultando aplicativos do Windows…', cancellable: false
+      location: vscode.ProgressLocation.Notification, title: 'Querying Windows applications…', cancellable: false
     }, task),
     offerNative: async message => {
-      const action = 'Abrir com o Windows…';
+      const action = 'Open With Windows…';
       return await vscode.window.showWarningMessage(message, action) === action;
     },
     error: async message => { await vscode.window.showErrorMessage(message); }

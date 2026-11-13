@@ -15,3 +15,8 @@ Task 3: complete pending final archive inspection.
 
 Compatibility correction 0.1.1: ASSOC_FILTER_RECOMMENDED and defensive recommended-only filtering in TypeScript. Regression tests RED (2 failures) → GREEN, 20 tests passed. C# compiled; native Windows execution remains unverified.
 Delivery helper corrected to load both System.IO.Compression and System.IO.Compression.FileSystem for Windows PowerShell; tested archive patch reconstruction separately.
+
+Follow-up 0.1.2: all maintained UI text, errors, metadata, tests, and documentation translated into English. Technical extension and command IDs preserved; Unicode test inputs retained.
+DOCX reproduction: a screenshot showed generic handlers, including recommended Notepad. Three regression tests failed before the fix. Added a conservative executable allowlist for known DOCX document editors, checked during listing and direct opening. Other file types retain Windows recommendations.
+Final independent follow-up review: no material findings. Unknown/alternate DOCX handler identities may be omitted; this limitation and the explicit native fallback are documented. Native Windows application launching remains unverified.
+Follow-up verification: 25 automated tests pass; the VSIX includes dist/compatibility.js and English metadata/messages.

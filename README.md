@@ -1,52 +1,68 @@
-# Abrir com programa externo
+# Open With External Application
 
-Extensão para **VS Code no Windows**: clique com o botão direito em um arquivo, escolha **Abrir com programa externo…** e selecione um aplicativo em uma lista pesquisável.
+A **VS Code extension for Windows**: right-click a file, choose **Open With External Application…**, and select an application from a searchable list.
 
-## Instalar
+## Install
 
-1. Baixe `abrir-com-externo-0.1.1.vsix`.
-2. No VS Code, abra **Extensões** (`Ctrl+Shift+X`).
-3. No menu **…**, selecione **Instalar do VSIX…** e escolha o arquivo.
-4. Se solicitado, recarregue a janela do VS Code.
+1. Download `abrir-com-externo-0.1.2.vsix`, or build it from source as described below.
+2. In VS Code, open **Extensions** (`Ctrl+Shift+X`).
+3. Open the **…** menu, select **Install from VSIX…**, and choose the package.
+4. Reload the VS Code window if prompted.
 
-Também é possível instalar pelo terminal:
+You can also install from a terminal:
 
 ```powershell
-code --install-extension .\abrir-com-externo-0.1.1.vsix
+code --install-extension .\abrir-com-externo-0.1.2.vsix
 ```
 
-A extensão usa o Windows PowerShell 5.1 e as APIs Shell incluídas no Windows. Não precisa instalar Node.js ou ferramentas de desenvolvimento para usar o VSIX. Compatível com VS Code 1.96 ou posterior; destinado a Windows 10/11.
+The extension uses Windows PowerShell 5.1 and the Windows Shell APIs. You do not need Node.js or development tools to use the VSIX. Requires VS Code 1.96 or later; intended for Windows 10/11.
 
-## Usar
+## Usage
 
-- No Explorer do VS Code, clique com o botão direito em um **arquivo** e escolha **Abrir com programa externo…**.
-- Também funciona no menu de contexto do editor e da aba do arquivo.
-- Pela paleta (`Ctrl+Shift+P`), execute **Arquivo: Abrir com programa externo…** para o arquivo ativo.
-- Digite o nome do programa para filtrar a lista e pressione `Enter` para abrir. `Esc` cancela.
-- **Escolher outro aplicativo no Windows…** abre o diálogo nativo.
-- Sem programas associados, a extensão oferece o diálogo nativo.
-- Se houver alterações não salvas, escolha entre **Salvar e abrir**, **Abrir versão salva** ou cancelar.
+- In the VS Code Explorer, right-click a **file** and select **Open With External Application…**.
+- The command is also available in the editor and editor tab context menus.
+- From the Command Palette (`Ctrl+Shift+P`), run **File: Open With External Application…** for the active file.
+- Type an application name to filter the list, then press `Enter` to open it. Press `Esc` to cancel.
+- **Choose Another Application in Windows…** opens the native Windows dialog.
+- If no supported applications are found, the extension offers the native dialog.
+- For unsaved changes, choose **Save and Open**, **Open Saved Version**, or cancel.
 
-A lista inclui somente os aplicativos que o Windows recomenda para aquele tipo de arquivo (`ASSOC_FILTER_RECOMMENDED`); os genéricos não recomendados são excluídos. “Recomendado pelo Windows” não significa necessariamente que o programa é o padrão. Essa classificação depende do registro do Windows e não é uma inspeção do conteúdo do arquivo. A extensão não modifica as associações padrão.
+Extension labels and messages are in English. Application names and the native dialog use the language provided by Windows. The technical extension identifier remains `local-tools.abrir-com-externo`, and the command identifier remains `abrirComExterno.open` for compatibility.
 
-## Como a lista é descoberta
+## Application discovery and DOCX filtering
 
-A extensão consulta `SHAssocEnumHandlers` para a extensão do arquivo, obtém nomes com `IAssocHandler` e passa o arquivo ao handler selecionado por `IDataObject`. Assim, usa os aplicativos que o Windows registra para esse tipo, sem manter uma lista fixa de executáveis. Arquivos e IDs são enviados em JSON pela entrada padrão do PowerShell, sem interpolação em comandos.
+The extension queries `SHAssocEnumHandlers` for the file extension using `ASSOC_FILTER_RECOMMENDED`, reads application names through `IAssocHandler`, and opens the file with the selected handler through `IDataObject`. Paths and handler IDs are sent as JSON through PowerShell's standard input, without interpolation into executable commands.
 
-Nem todo programa instalado registra os formatos que suporta: esses programas podem não aparecer. Nesse caso, use a opção nativa e escolha outro aplicativo. Tipos sem extensão também usam o diálogo nativo. A disponibilidade de programas depende das associações do usuário atual.
+**A Windows recommendation does not prove format support.** Windows can recommend generic applications such as Notepad for a DOCX file even though they do not render a Word document correctly.
 
-## Limites
+For **`.docx` files**, the extension therefore applies an additional conservative filter. It lists only recommended handlers whose executable matches a known document editor:
 
-- Somente arquivos locais acessíveis no Windows; arquivos em WSL, SSH, contêineres e sistemas virtuais não são compatíveis.
-- Pastas e documentos ainda não salvos em disco não são aceitos.
-- Programas removidos ou associações alteradas após carregar a lista podem causar erro; execute o comando novamente.
-- Políticas corporativas que bloqueiam PowerShell ou `Add-Type` podem impedir a consulta e a abertura. A extensão não contorna políticas de grupo.
-- A confirmação de abertura indica que o Windows aceitou o pedido; não monitora a janela ou o funcionamento do aplicativo externo.
-- A extensão não faz requisições de rede nem coleta telemetria. O aplicativo escolhido recebe o arquivo para abri-lo.
+| Application | Recognized executable |
+| --- | --- |
+| Microsoft Word | `WINWORD.EXE` |
+| LibreOffice / Apache OpenOffice | `swriter.exe`, `soffice.exe` |
+| WPS Writer | `wps.exe` |
+| ONLYOFFICE Desktop Editors | `DesktopEditors.exe` |
+| SoftMaker TextMaker | `textmaker.exe` |
 
-## Desenvolver
+This excludes Notepad, PowerShell, Visual Studio Code, ChatGPT, Visual Studio Version Selector, UiPath Studio, VLC, and other generic handlers from the DOCX picker, including handlers that Windows marks as recommended. Matching uses the executable name, not the application's localized display name. The same DOCX check runs before invoking a selected handler.
 
-Requer Node.js 22 ou posterior e npm. Extraia o ZIP de fontes, abra a pasta no VS Code e execute:
+The DOCX list is intentionally conservative: an unrecognized document editor or a handler that exposes a different identity may be omitted. Use **Choose Another Application in Windows…** to select such an application manually. That explicit native choice is not restricted by the extension's DOCX list. Formatting fidelity depends on the chosen editor and document features; the filter does not inspect the document contents.
+
+Other file types continue to use the recommended handlers registered by Windows, without an additional format-specific editor list. They do not have the stronger DOCX filter. Applications that do not register their formats may be absent. Extensionless files use the native dialog. Available applications depend on the current user's Windows associations. The extension does not change default associations.
+
+## Limitations
+
+- Only accessible local Windows files are supported. Remote files in WSL, SSH, containers, and virtual file systems are not supported.
+- Folders and documents that have not been saved to disk are not accepted.
+- Removing an application or changing associations while the picker is open may cause an error; run the command again.
+- Corporate policies blocking PowerShell or `Add-Type` may prevent discovery and opening. The extension does not bypass Group Policy.
+- A completed launch request means Windows accepted the request; the extension does not monitor the external application window or verify that the document rendered correctly.
+- The extension makes no network requests and collects no telemetry. The selected application receives the file to open it.
+
+## Development
+
+Requires Node.js 22 or later and npm. Clone the repository or extract the source archive, open the project folder in VS Code, and run:
 
 ```sh
 npm ci
@@ -54,31 +70,34 @@ npm test
 npm run package
 ```
 
-Pressione `F5` para abrir uma janela de desenvolvimento da extensão. O pacote compilado estará em `abrir-com-externo-0.1.1.vsix`. O identificador `local-tools.abrir-com-externo` é para distribuição local; não houve publicação no Marketplace.
+Press `F5` to launch an Extension Development Host. The compiled package is `abrir-com-externo-0.1.2.vsix`. The extension has not been published to the VS Code Marketplace.
 
-### Estrutura
+### Project structure
 
-- `src/extension.ts`: menus, Quick Pick e integração com VS Code.
-- `src/command.ts`: fluxo, validação e fallback.
-- `src/windows.ts`: comunicação por JSON e validação da resposta.
-- `scripts/bridge.ps1`: entrada do PowerShell.
-- `scripts/Associations.cs`: APIs COM/Shell do Windows.
-- `test/`: testes automatizados de fluxo e transporte com fronteiras do sistema simuladas.
+- `src/extension.ts`: menus, Quick Pick, and VS Code integration.
+- `src/command.ts`: command flow, validation, and fallback.
+- `src/windows.ts`: JSON transport and response validation.
+- `src/compatibility.ts`: conservative DOCX editor filtering.
+- `scripts/bridge.ps1`: PowerShell entry point.
+- `scripts/Associations.cs`: Windows COM/Shell APIs.
+- `test/`: automated command, transport, and compatibility tests with simulated operating-system boundaries.
 
-## Validação
+## Validation
 
-Os testes automatizados e a compilação TypeScript são executados em Linux. Também foi verificada a compilação do C# e uma chamada sem extensão usando PowerShell 7 em Linux. Os testes verificam a lógica e o transporte com o Windows simulado; **não comprovam a enumeração nem a abertura real de aplicativos no Windows**.
+Automated tests and TypeScript compilation run on Linux. C# compilation and an extensionless-file bridge call have also been checked using PowerShell 7 on Linux. These checks **do not establish that native application discovery and launching work on Windows PowerShell 5.1**.
 
-Antes de distribuir para outras pessoas, confira em Windows 10/11:
+Before distributing the extension, verify on Windows 10/11:
 
-- Instalar o VSIX e verificar menus e paleta.
-- Abrir `.txt`, `.png`, `.pdf` e outro formato com mais de um aplicativo registrado; comparar com “Abrir com” do Explorer do Windows.
-- Selecionar aplicativos tradicionais e da Microsoft Store, quando disponíveis, com o aplicativo fechado (primeira abertura) e já aberto; conferir ativação assíncrona e programas que usam DDE.
-- Usar nomes com espaços, acentos, `&`, colchetes e apóstrofos.
-- Cancelar a lista e o diálogo nativo sem abrir o arquivo.
-- Experimentar formato desconhecido e arquivo sem extensão.
-- Verificar salvamento, abertura da versão em disco e cancelamento de alterações não salvas.
-- Remover ou alterar uma associação com a lista aberta e verificar a mensagem de erro.
-- Conferir rejeição de pastas e arquivos remotos.
+- Install the VSIX and check menus and the Command Palette.
+- Open `.txt`, `.png`, `.pdf`, and another format with multiple registered applications.
+- Open a `.docx` file with Word and another supported office suite installed; verify that generic handlers are absent, including Notepad even when Windows recommends it.
+- Try a DOCX file with no recognized editor installed and check the fallback message.
+- Test traditional and Microsoft Store applications where available, both on first launch and while already running; verify asynchronous activation and DDE-based applications.
+- Use paths containing spaces, accented characters, `&`, brackets, and apostrophes.
+- Cancel the picker and native dialog without opening the file.
+- Try an unknown format and an extensionless file.
+- Verify saving changes, opening the saved disk version, and cancelling.
+- Remove or change an association while the picker is open and check the error message.
+- Check that folders and remote files are rejected.
 
-Licença MIT.
+MIT License.

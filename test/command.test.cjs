@@ -1,7 +1,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { runOpenExternal } = require('../dist/command.js');
-const target = { scheme: 'file', fsPath: 'C:\\Meus arquivos\\ação.txt' };
+const target = { scheme: 'file', fsPath: 'C:\\My files\\café.txt' };
 const app = { id: 'app-id', name: 'Editor', recommended: true };
 function setup(overrides = {}, bridgeOverrides = {}) {
   const calls = [];
@@ -21,25 +21,25 @@ function setup(overrides = {}, bridgeOverrides = {}) {
   };
   return { host, bridge, calls };
 }
-test('usa arquivo ativo e abre aplicativo selecionado pelo ID', async () => {
+test('uses the active file and opens the selected application by ID', async () => {
   const { host, bridge, calls } = setup();
   assert.equal(await runOpenExternal(host, bridge), 'opened');
   assert.deepEqual(calls.at(-1), ['open', target.fsPath, app.id]);
 });
-test('arquivo do menu tem prioridade sobre o arquivo ativo', async () => {
+test('the context menu file takes priority over the active file', async () => {
   const { host, bridge, calls } = setup();
-  const selected = { scheme: 'file', fsPath: 'C:\\outro.pdf' };
+  const selected = { scheme: 'file', fsPath: 'C:\\other.pdf' };
   await runOpenExternal(host, bridge, selected);
   assert.deepEqual(calls[0], ['list', selected.fsPath]);
 });
-test('cancelar Quick Pick ou salvar não abre nada', async () => {
+test('cancelling Quick Pick or saving does not open anything', async () => {
   for (const overrides of [{ pick: async () => undefined }, { prepareFile: async () => false }]) {
     const { host, bridge, calls } = setup(overrides);
     assert.equal(await runOpenExternal(host, bridge), 'cancelled');
     assert.ok(!calls.some(c => ['open', 'native'].includes(c[0])));
   }
 });
-test('rejeita plataforma, remoto, untitled, diretório e falta de arquivo', async () => {
+test('rejects unsupported platforms, remote files, untitled documents, folders, and missing files', async () => {
   for (const [overrides, file, status] of [
     [{ platform: 'linux' }, target, 'unsupported'],
     [{}, { scheme: 'vscode-remote', fsPath: '/remote/a.txt' }, 'invalid'],
@@ -53,29 +53,29 @@ test('rejeita plataforma, remoto, untitled, diretório e falta de arquivo', asyn
     assert.ok(calls.some(c => c[0] === 'error'));
   }
 });
-test('sem associações, inclusive arquivo sem extensão, oferece diálogo nativo', async () => {
+test('offers the native dialog when no supported applications exist, including extensionless files', async () => {
   const { host, bridge, calls } = setup({}, { list: async () => [] });
   assert.equal(await runOpenExternal(host, bridge, { scheme: 'file', fsPath: 'C:\\README' }), 'opened');
   assert.deepEqual(calls.at(-1), ['native', 'C:\\README']);
 });
-test('recusar diálogo nativo não abre nada', async () => {
+test('declining the native dialog does not open anything', async () => {
   const { host, bridge, calls } = setup({ offerNative: async () => false }, { list: async () => [] });
   assert.equal(await runOpenExternal(host, bridge), 'cancelled');
   assert.ok(!calls.some(c => c[0] === 'native'));
 });
-test('falha de descoberta oferece fallback e mantém causa na mensagem', async () => {
+test('discovery failure offers a fallback and preserves the cause in the message', async () => {
   const { host, bridge, calls } = setup({}, { list: async () => { throw new Error('policy blocked'); } });
   assert.equal(await runOpenExternal(host, bridge), 'opened');
   assert.ok(calls.some(c => c[0] === 'offer' && c[1].includes('policy blocked')));
 });
-test('selecionar opção nativa na lista abre diálogo', async () => {
+test('selecting the native option in the list opens the dialog', async () => {
   const { host, bridge, calls } = setup({ pick: async () => ({ kind: 'native' }) });
   assert.equal(await runOpenExternal(host, bridge), 'opened');
   assert.deepEqual(calls.at(-1), ['native', target.fsPath]);
 });
-test('erro ao abrir aplicativo ou diálogo é exibido sem sucesso falso', async () => {
+test('application and dialog launch errors are displayed without reporting success', async () => {
   for (const bridgeOverrides of [
-    { open: async () => { throw new Error('handler removido'); } },
+    { open: async () => { throw new Error('handler removed'); } },
     { list: async () => [], native: async () => { throw new Error('dialog failed'); } }
   ]) {
     const { host, bridge, calls } = setup({}, bridgeOverrides);
@@ -83,7 +83,7 @@ test('erro ao abrir aplicativo ou diálogo é exibido sem sucesso falso', async 
     assert.equal(calls.at(-1)[0], 'error');
   }
 });
-test('arquivo inacessível mostra erro', async () => {
+test('an inaccessible file displays an error', async () => {
   const { host, bridge, calls } = setup({ isFile: async () => { throw new Error('EACCES'); } });
   assert.equal(await runOpenExternal(host, bridge), 'failed');
   assert.ok(calls.at(-1)[1].includes('EACCES'));
