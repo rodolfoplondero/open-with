@@ -20,3 +20,5 @@ Follow-up 0.1.2: all maintained UI text, errors, metadata, tests, and documentat
 DOCX reproduction: a screenshot showed generic handlers, including recommended Notepad. Three regression tests failed before the fix. Added a conservative executable allowlist for known DOCX document editors, checked during listing and direct opening. Other file types retain Windows recommendations.
 Final independent follow-up review: no material findings. Unknown/alternate DOCX handler identities may be omitted; this limitation and the explicit native fallback are documented. Native Windows application launching remains unverified.
 Follow-up verification: 25 automated tests pass; the VSIX includes dist/compatibility.js and English metadata/messages.
+
+Follow-up 0.1.3: the picker kept focus because ignoreFocusOut was true. Set it to false so clicking outside dismisses the picker; existing cancellation handling returns without launching an application.

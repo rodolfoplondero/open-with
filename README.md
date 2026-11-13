@@ -4,7 +4,7 @@ A **VS Code extension for Windows**: right-click a file, choose **Open With Exte
 
 ## Install
 
-1. Download `abrir-com-externo-0.1.2.vsix`, or build it from source as described below.
+1. Download `abrir-com-externo-0.1.3.vsix`, or build it from source as described below.
 2. In VS Code, open **Extensions** (`Ctrl+Shift+X`).
 3. Open the **…** menu, select **Install from VSIX…**, and choose the package.
 4. Reload the VS Code window if prompted.
@@ -12,7 +12,7 @@ A **VS Code extension for Windows**: right-click a file, choose **Open With Exte
 You can also install from a terminal:
 
 ```powershell
-code --install-extension .\abrir-com-externo-0.1.2.vsix
+code --install-extension .\abrir-com-externo-0.1.3.vsix
 ```
 
 The extension uses Windows PowerShell 5.1 and the Windows Shell APIs. You do not need Node.js or development tools to use the VSIX. Requires VS Code 1.96 or later; intended for Windows 10/11.
@@ -22,7 +22,7 @@ The extension uses Windows PowerShell 5.1 and the Windows Shell APIs. You do not
 - In the VS Code Explorer, right-click a **file** and select **Open With External Application…**.
 - The command is also available in the editor and editor tab context menus.
 - From the Command Palette (`Ctrl+Shift+P`), run **File: Open With External Application…** for the active file.
-- Type an application name to filter the list, then press `Enter` to open it. Press `Esc` to cancel.
+- Type an application name to filter the list, then press `Enter` to open it. Press `Esc` or click outside the picker to dismiss it without opening an application.
 - **Choose Another Application in Windows…** opens the native Windows dialog.
 - If no supported applications are found, the extension offers the native dialog.
 - For unsaved changes, choose **Save and Open**, **Open Saved Version**, or cancel.
@@ -70,7 +70,7 @@ npm test
 npm run package
 ```
 
-Press `F5` to launch an Extension Development Host. The compiled package is `abrir-com-externo-0.1.2.vsix`. The extension has not been published to the VS Code Marketplace.
+Press `F5` to launch an Extension Development Host. The compiled package is `abrir-com-externo-0.1.3.vsix`. The extension has not been published to the VS Code Marketplace.
 
 ### Project structure
 

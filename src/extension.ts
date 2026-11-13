@@ -40,7 +40,7 @@ export function activate(context: vscode.ExtensionContext): void {
       const chosen = await vscode.window.showQuickPick(items, {
         title: `Open ${path.win32.basename(filePath)} With…`,
         placeHolder: 'Search for and select an application',
-        matchOnDescription: true, matchOnDetail: true, ignoreFocusOut: true
+        matchOnDescription: true, matchOnDetail: true, ignoreFocusOut: false
       });
       return chosen?.choice;
     },
